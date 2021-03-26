@@ -1,4 +1,6 @@
 '''
+Module displays image with bounding box.
+
 Created on Mar 24, 2021
 
 @author: maltaweel
@@ -6,16 +8,17 @@ Created on Mar 24, 2021
 
 # display image with masks and bounding boxes
 import os
+# fit a mask rcnn on the kangaroo dataset
 from os import listdir
 from xml.etree import ElementTree
 from numpy import zeros
 from numpy import asarray
 from mrcnn.utils import Dataset
-from mrcnn.visualize import display_instances
-from mrcnn.utils import extract_bboxes
+from mrcnn.config import Config
+from mrcnn import model as modellib
  
-# class that defines and loads the kangaroo dataset
-class KangarooDataset(Dataset):
+# class that defines and loads the image dataset
+class ImageDataset(Dataset):
     # load the dataset definitions
     def load_dataset(self, dataset_dir, is_train=True):
         # define one class
@@ -85,22 +88,41 @@ class KangarooDataset(Dataset):
     def image_reference(self, image_id):
         info = self.image_info[image_id]
         return info['path']
+ 
+# define a configuration for the model
+class KangarooConfig(Config):
+    # define the name of the configuration
+    NAME = "kangaroo_cfg"
+    # number of classes (background + kangaroo)
+    NUM_CLASSES = 1 + 1
+    # number of training steps per epoch
+    STEPS_PER_EPOCH = 131
 
+#path 
 pn=os.path.abspath(__file__)
 pn=pn.split("src")[0]
 path=os.path.join(pn,'kangaroo')
+model_path=os.path.join(pn,'model_dir')
 
-# train set
-train_set = KangarooDataset()
+# prepare train set
+train_set = ImageDataset()
 train_set.load_dataset(path, is_train=True)
 train_set.prepare()
-# define image id
-image_id = 1
-# load the image
-image = train_set.load_image(image_id)
-# load the masks and the class ids
-mask, class_ids = train_set.load_mask(image_id)
-# extract bounding boxes from the masks
-bbox = extract_bboxes(mask)
-# display image with masks and bounding boxes
-display_instances(image, bbox, mask, class_ids, train_set.class_names)
+print('Train: %d' % len(train_set.image_ids))
+# prepare test/val set
+test_set = ImageDataset()
+test_set.load_dataset(path, is_train=False)
+test_set.prepare()
+
+print('Test: %d' % len(test_set.image_ids))
+# prepare config
+config = KangarooConfig()
+config.display()
+# define the model
+
+model = modellib.MaskRCNN(mode="training", config=config,
+                                  model_dir=model_path)
+# load weights (mscoco) and exclude the output layers
+model.load_weights('mask_rcnn_coco.h5', by_name=True, exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",  "mrcnn_bbox", "mrcnn_mask"])
+# train weights (output layers or 'heads')
+model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, layers='heads')

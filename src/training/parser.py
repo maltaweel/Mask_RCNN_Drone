@@ -1,4 +1,6 @@
 '''
+Module that parses location for bounding boxes from example image.
+
 Created on Mar 24, 2021
 
 @author: maltaweel

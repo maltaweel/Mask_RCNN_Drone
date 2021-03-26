@@ -1,17 +1,18 @@
 '''
+Module that loads an image from training set and puts a mask on it.
+
 Created on Mar 24, 2021
 
 @author: maltaweel
 '''
-    
-# plot one photograph and mask
 import os
 from os import listdir
 from xml.etree import ElementTree
 from numpy import zeros
 from numpy import asarray
 from mrcnn.utils import Dataset
-from matplotlib import pyplot
+from mrcnn.visualize import display_instances
+from mrcnn.utils import extract_bboxes
  
 # class that defines and loads the kangaroo dataset
 class KangarooDataset(Dataset):
@@ -85,6 +86,7 @@ class KangarooDataset(Dataset):
         info = self.image_info[image_id]
         return info['path']
 
+#path 
 pn=os.path.abspath(__file__)
 pn=pn.split("src")[0]
 path=os.path.join(pn,'kangaroo')
@@ -93,15 +95,13 @@ path=os.path.join(pn,'kangaroo')
 train_set = KangarooDataset()
 train_set.load_dataset(path, is_train=True)
 train_set.prepare()
-# load an image
-image_id = 0
+# define image id
+image_id = 1
+# load the image
 image = train_set.load_image(image_id)
-print(image.shape)
-# load image mask
+# load the masks and the class ids
 mask, class_ids = train_set.load_mask(image_id)
-print(mask.shape)
-# plot image
-pyplot.imshow(image)
-# plot mask
-pyplot.imshow(mask[:, :, 0], cmap='gray', alpha=0.5)
-pyplot.show()
+# extract bounding boxes from the masks
+bbox = extract_bboxes(mask)
+# display image with masks and bounding boxes
+display_instances(image, bbox, mask, class_ids, train_set.class_names)
