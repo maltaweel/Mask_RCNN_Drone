@@ -16,7 +16,8 @@ from numpy import asarray
 from mrcnn.utils import Dataset
 from mrcnn.config import Config
 from mrcnn import model as modellib
- 
+
+
 # class that defines and loads the image dataset
 class ImageDataset(Dataset):
     # load the dataset definitions
@@ -103,6 +104,7 @@ pn=os.path.abspath(__file__)
 pn=pn.split("src")[0]
 path=os.path.join(pn,'kangaroo')
 model_path=os.path.join(pn,'model_dir')
+weights_path=os.path.join(pn,'weights','mask_rcnn_coco.h5')
 
 # prepare train set
 train_set = ImageDataset()
@@ -123,6 +125,6 @@ config.display()
 model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=model_path)
 # load weights (mscoco) and exclude the output layers
-model.load_weights('mask_rcnn_coco.h5', by_name=True, exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",  "mrcnn_bbox", "mrcnn_mask"])
+model.load_weights(weights_path, by_name=True, exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",  "mrcnn_bbox", "mrcnn_mask"])
 # train weights (output layers or 'heads')
 model.train(train_set, test_set, learning_rate=config.LEARNING_RATE, epochs=5, layers='heads')
