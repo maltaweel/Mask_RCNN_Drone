@@ -1,0 +1,6 @@
+mrcnn==0.2
+pip==21.0.1
+opencv_python==4.5.1.48
+numpy==1.19.5
+wheel==0.36.2
+pixellib==0.6.1
