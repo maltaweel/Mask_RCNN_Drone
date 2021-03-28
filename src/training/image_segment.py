@@ -15,6 +15,7 @@ model_path=os.path.join(pn,'model_dir')
 weights_path=os.path.join(pn,'weights','mask_rcnn_coco.h5')
 output_segmentation=os.path.join(pn,'output_segmentation','segmented.jpg')
 
+#segmentation
 instance_seg = instance_segmentation()
 instance_seg.load_model(weights_path)
 instance_seg.segmentImage(path, show_bboxes = True, output_image_name = output_segmentation)
